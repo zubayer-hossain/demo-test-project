@@ -35,7 +35,11 @@ class DemoTestDeactivateApiTest extends TestCase
 
         $response = $this->postJson(route('demo.test.deactivate'), ['ref' => $demoTest->ref]);
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
-
-        $response->assertJson(['message' => 'The test with the given reference ID is already inactive.']);
+        $response->assertJson([
+            'message' => 'The given data was invalid.',
+            'errors' => [
+                'ref' => ['The test with the given reference ID is already inactive.']
+            ]
+        ]);
     }
 }

@@ -1,7 +1,8 @@
 # Demo Test Project
 
-This project is a Laravel-based API that handles the creation, activation, and deactivation of demo test items. It includes robust testing capabilities and uses a database to manage state and simulate various test conditions.
+Demo Test Project is a Laravel-based API that efficiently manages the lifecycle of demo test items such as creation, activation, and deactivation using a sophisticated queuing system. Users can interact with the API to submit multiple test items identified by a unique reference ID, along with associated names and descriptions. The project leverages Laravel's queue functionality to process these items, ensuring scalability and robust handling under various load conditions.
 
+Additionally, the project includes comprehensive testing features designed to validate the functionality and reliability of the API endpoints and the queuing system. Automated tests cover scenarios ranging from typical use cases to error handling and load testing, ensuring that the system behaves as expected even when simulating job failures. This rigorous testing framework is vital for maintaining high standards of quality and performance in deployment.
 ## Requirements
 
 - PHP 8.1 or higher
@@ -107,6 +108,61 @@ You can test the API endpoints using Postman or any other API client:
     "ref": "T-1"
 }
 ```
+## Error Handling in API Responses
+
+API errors are structured in JSON format to provide comprehensive feedback. When a request fails validation, all validation errors are returned.
+Here is an example of a 422 error response for the `/api/demo/test` endpoint:
+
+```json
+{
+    "message": "The given data was invalid.",
+    "errors": {
+        "0.ref": [
+            "The ref is required for each item."
+        ],
+        "2.ref": [
+            "Duplicate ref found for T-3. Please remove duplicates."
+        ],
+        "3.ref": [
+            "Duplicate ref found for T-3. Please remove duplicates."
+        ],
+        "4.ref": [
+            "Invalid ref format for ref czx-fd. The ref must follow the format T-[number]."
+        ],
+        "1.name": [
+            "The name is required for each item."
+        ],
+        "items": [
+            "A maximum of 2000 items are allowed."
+        ]
+    }
+}
+```
+Here is an example of a 422 error response for the `/api/demo/test/activate` endpoint:
+
+```json
+{
+    "message": "The given data was invalid.",
+    "errors": {
+        "ref": [
+            "The test with the given reference ID does not exist."
+        ]
+    }
+}
+```
+Here is an example of a 422 error response for the `/api/demo/test/deactivate` endpoint:
+
+```json
+{
+    "message": "The given data was invalid.",
+    "errors": {
+        "ref": [
+            "The test with the given reference ID is already inactive."
+        ]
+    }
+}
+```
+
 ## Simulating Failures
 
 To simulate job failures at a rate of approximately 10%, set the environment variable `SIMULATE_FAILURE` to `true` in your `.env` file. Adjust this as needed to test different failure scenarios.
@@ -126,28 +182,3 @@ php artisan test
 Here is a screenshot of a successful test results after running `php artisan test`:
 
 ![Test Results](php_unit_test_result_screen.png)
-
-## Error Handling in API Responses
-
-API errors are structured in JSON format to provide clear, actionable information. Here are some error examples of `422` Unprocessable Entity responses:
-
-```json
-{
-    "message": "A maximum of 2000 items are allowed."
-}
-```
-```json
-{
-    "message": "Each ref must follow the format T-[number]."
-}
-```
-```json
-{
-    "message": "A name is required for each item."
-}
-```
-```json
-{
-    "message": "The test with the given reference ID is already active."
-}
-```

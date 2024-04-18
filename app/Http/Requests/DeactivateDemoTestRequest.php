@@ -79,13 +79,9 @@ class DeactivateDemoTestRequest extends FormRequest
      */
     protected function failedValidation(Validator $validator)
     {
-        $errors = $validator->errors()->messages();
-
-        // Find the first error message
-        $firstErrorKey = array_key_first($errors);
-        $firstErrorMessage = $errors[$firstErrorKey][0];
-        $formattedError = ["message" => $firstErrorMessage];
-
-        throw new HttpResponseException(response()->json($formattedError, Response::HTTP_UNPROCESSABLE_ENTITY));
+        throw new HttpResponseException(response()->json([
+            'message' => 'The given data was invalid.',
+            'errors' => $validator->errors()
+        ], Response::HTTP_UNPROCESSABLE_ENTITY));
     }
 }

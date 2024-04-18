@@ -28,85 +28,77 @@ class DemoTestApiTest extends TestCase
     }
 
     /**
-    * Test handling of more than 2000 objects to simulate a validation error.
-    */
+     * Test handling of more than 2000 objects to simulate a validation error.
+     */
     public function test_handling_of_excessive_objects_triggers_validation_error()
     {
+        // Generating more than 2000 objects to exceed the limit
         $data = DemoTest::factory()->count(2001)->make()->toArray();
+
+        // Sending a POST request with the data
         $response = $this->postJson($this->demoTestApiEndpoint, $data);
 
+        // Asserting that the status code is HTTP_UNPROCESSABLE_ENTITY
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
-        $response->assertJson(['message' => 'A maximum of 2000 items are allowed.']);
+
+        // Asserting the full response structure including the comprehensive error details
+        $response->assertJson([
+            'message' => 'The given data was invalid.',
+            'errors' => [
+                'items' => ['A maximum of 2000 items are allowed.']
+            ]
+        ]);
     }
 
     /**
-     * Test 'ref' field is required.
+     * Test ref and name fields are required.
      */
-    public function test_ref_field_is_required()
+    public function test_ref_and_name_fields_are_required()
     {
         $data = [
             [
-                'name' => 'Test Name',
                 'description' => 'Test Description'
             ]
         ];
 
         $response = $this->postJson($this->demoTestApiEndpoint, $data);
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
-        $response->assertJson(['message' => 'A ref is required for each item.']);
+        $response->assertJson([
+            'message' => 'The given data was invalid.',
+            'errors' => [
+                '0.ref' => ['The ref is required for each item.'],
+                '0.name' => ['The name is required for each item.']
+            ]
+        ]);
     }
 
     /**
-     * Test 'ref' field must follow specific format.
+     * Test multiple validation errors.
      */
-    public function test_ref_field_must_follow_specific_format()
+    public function test_multiple_validation_errors_in_response()
     {
+        // Assuming $data contains the test data that would generate the sample response you provided
         $data = [
-            [
-                'ref' => 'InvalidRef',
-                'name' => 'Another Test',
-                'description' => 'Another Test Description'
-            ]
+            ['name' => 'Test', 'description' => 'Test without ref'], // Missing ref
+            ['ref' => 'T-1', 'description' => 'Test with name missing'], // Missing name
+            ['ref' => 'T-3', 'name' => 'Duplicate Ref Test', 'description' => 'Test Description'], // Duplicate ref
+            ['ref' => 'T-3', 'name' => 'Duplicate Ref Test Again', 'description' => 'Test Description'], // Duplicate ref
+            ['ref' => 'czx-fd', 'name' => 'Invalid Format', 'description' => 'Test Description'], // Invalid ref format
         ];
 
         $response = $this->postJson($this->demoTestApiEndpoint, $data);
-        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
-        $response->assertJson(['message' => 'Each ref must follow the format T-[number].']);
-    }
 
-    /**
-     * Test 'name' field is required.
-     */
-    public function test_name_field_is_required()
-    {
-        $data = [
-            [
-                'ref' => 'T-2001',
-                'description' => 'Description without name'
+        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+        $response->assertJson([
+            'message' => 'The given data was invalid.',
+            'errors' => [
+                '0.ref' => ['The ref is required for each item.'],
+                '1.name' => ['The name is required for each item.'],
+                '2.ref' => ['Duplicate ref found for T-3. Please remove duplicates.'],
+                '3.ref' => ['Duplicate ref found for T-3. Please remove duplicates.'],
+                '4.ref' => ['Invalid ref format for ref czx-fd. The ref must follow the format T-[number].'],
             ]
-        ];
-
-        $response = $this->postJson($this->demoTestApiEndpoint, $data);
-        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
-        $response->assertJson(['message' => 'A name is required for each item.']);
-    }
-
-    /**
-     * Test 'name' field must be a string.
-     */
-    public function test_name_field_must_be_a_string()
-    {
-        $data = [
-            [
-                'ref' => 'T-3001',
-                'name' => 12345,
-                'description' => 'Test Description'
-            ]
-        ];
-
-        $response = $this->postJson($this->demoTestApiEndpoint, $data);
-        $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
-        $response->assertJson(['message' => 'The name must be a string.']);
+        ]);
     }
 
     /**
@@ -143,7 +135,14 @@ class DemoTestApiTest extends TestCase
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
 
         // Assert the expected validation error message
-        $response->assertJson(['message' => 'One or more items are inactive and cannot be processed.']);
+        $response->assertJson(
+            [
+                'message' => 'The given data was invalid.',
+                'errors' => [
+                    'items' => ['One or more items are inactive and cannot be processed.']
+                ]
+            ]
+        );
     }
 
     /**

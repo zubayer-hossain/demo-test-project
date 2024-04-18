@@ -43,10 +43,10 @@ class DemoTestStoreRequest extends FormRequest
     public function messages(): array
     {
         return [
-            '*.ref.required' => 'A ref is required for each item.',
-            '*.ref.distinct' => 'Each ref in the list must be unique.',
-            '*.ref.regex' => 'Each ref must follow the format T-[number].',
-            '*.name.required' => 'A name is required for each item.',
+            '*.ref.required' => 'The ref is required for each item.',
+            '*.ref.distinct' => 'Duplicate ref found for :input. Please remove duplicates.',
+            '*.ref.regex' => 'Invalid ref format for ref :input. The ref must follow the format T-[number].',
+            '*.name.required' => 'The name is required for each item.',
             '*.name.string' => 'The name must be a string.',
             '*.description.string' => 'The description must be a string.',
         ];
@@ -96,13 +96,9 @@ class DemoTestStoreRequest extends FormRequest
      */
     protected function failedValidation(Validator $validator)
     {
-        $errors = $validator->errors()->messages();
-
-        // Find the first error message
-        $firstErrorKey = array_key_first($errors);
-        $firstErrorMessage = $errors[$firstErrorKey][0];
-        $formattedError = ["message" => $firstErrorMessage];
-
-        throw new HttpResponseException(response()->json($formattedError, Response::HTTP_UNPROCESSABLE_ENTITY));
+        throw new HttpResponseException(response()->json([
+            'message' => 'The given data was invalid.',
+            'errors' => $validator->errors()
+        ], Response::HTTP_UNPROCESSABLE_ENTITY));
     }
 }

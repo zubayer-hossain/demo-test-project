@@ -41,7 +41,11 @@ class DemoTestActivateApiTest extends TestCase
 
         $response = $this->postJson(route('demo.test.activate'), ['ref' => $demoTest->ref]);
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
-
-        $response->assertJson(['message' => 'The test with the given reference ID is already active.']);
+        $response->assertJson([
+            'message' => 'The given data was invalid.',
+            'errors' => [
+                'ref' => ['The test with the given reference ID is already active.']
+            ]
+        ]);
     }
 }
