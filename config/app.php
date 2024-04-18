@@ -126,6 +126,11 @@ return [
     'cipher' => 'AES-256-CBC',
 
     /*
+     * Add simulate_failure to the app configuration
+    */
+    'simulate_failure' => env('SIMULATE_FAILURE', false),
+
+    /*
     |--------------------------------------------------------------------------
     | Autoloaded Service Providers
     |--------------------------------------------------------------------------
