@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\DemoTestInquiryStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -19,6 +20,7 @@ class DemoTestInquiry extends Model
     ];
 
     protected $casts = [
-        'payload' => 'array'
+        'payload' => 'array',
+        'status' => DemoTestInquiryStatus::class,
     ];
 }
