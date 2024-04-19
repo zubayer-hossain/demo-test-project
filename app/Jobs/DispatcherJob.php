@@ -40,7 +40,7 @@ class DispatcherJob implements ShouldQueue
         }
 
         // Decode the payload and dispatch jobs for each item
-        $items = json_decode($inquiry->payload, true);
+        $items = $inquiry->payload;
         $totalItems = count($items);
         $isSimulateFailure = config('app.simulate_failure');
         // Calculate the number of items that should fail based on the simulation configuration

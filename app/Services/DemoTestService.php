@@ -49,7 +49,7 @@ class DemoTestService
 
     /**
      * @param $ref
-     * @return string[]
+     * @return array<string, mixed>
      */
     public function activateTest($ref): array
     {
@@ -70,7 +70,7 @@ class DemoTestService
 
     /**
      * @param $ref
-     * @return string[]
+     * @return array<string, mixed>
      */
     public function deactivateTest($ref): array
     {
